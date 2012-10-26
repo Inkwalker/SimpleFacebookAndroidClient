@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Simple Facebook Android Client</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="app_id">155071474638150</string>
+
+</resources>
