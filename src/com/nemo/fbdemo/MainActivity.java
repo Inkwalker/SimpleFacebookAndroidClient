@@ -38,6 +38,7 @@ public class MainActivity extends FacebookActivity {
         for(int i = 0; i < fragments.length; i++) {
             restoreFragment(savedInstanceState, i);
         }
+        
     }
 
     @Override

@@ -1,22 +1,27 @@
 package com.nemo.fbdemo;
 
+import java.util.ArrayList;
+
 import com.facebook.GraphUser;
 import com.facebook.ProfilePictureView;
 import com.facebook.Request;
 import com.facebook.Session;
 import com.facebook.Response;
+import com.nemo.fbdemo.model.FeedEntity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class SelectionFragment extends Fragment {
 	
 	private ProfilePictureView profilePictureView;
 	private TextView userNameView;
+	private ListView feedListView;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -29,6 +34,8 @@ public class SelectionFragment extends Fragment {
 	    profilePictureView.setCropped(true);
 
 	    userNameView = (TextView) view.findViewById(R.id.selection_user_name);
+	    
+	    feedListView = (ListView) view.findViewById(R.id.feed);
 
 	    final Session session = Session.getActiveSession();
 	    if (session != null && session.isOpened()) {
@@ -44,7 +51,18 @@ public class SelectionFragment extends Fragment {
 	                }   
 	            }
 	            
-	        }); 
+	        });
+	        
+	        FeedDownloader downloader = new FeedDownloader();
+	        downloader.Download(new FeedDownloaderCallback() {
+				
+				@Override
+				public void Downloaded(ArrayList<FeedEntity> entities) {
+					FeedEntityAdapter adapter = new FeedEntityAdapter(entities);
+					feedListView.setAdapter(adapter);					
+				}
+			});
+	        
 	        Request.executeBatchAsync(request);
 	    }  
 

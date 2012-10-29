@@ -29,5 +29,11 @@
             android:layout_gravity="center"
             android:textColor="#333"
             android:textSize="18sp" />
-	</LinearLayout>	
+	</LinearLayout>
+	
+	<ListView 
+	    android:id="@+id/feed"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content">
+	</ListView>	
 </LinearLayout>
