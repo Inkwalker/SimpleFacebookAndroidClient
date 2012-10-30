@@ -6,8 +6,8 @@ public class StatusEntry extends FeedEntity {
 
 	private String message;
 	
-	public StatusEntry(JSONObject data) {
-		super(data);
+	public StatusEntry(UsersList users, JSONObject data) {
+		super(users, data);
 		
 		setMessage(data.optString("message"));
 	}

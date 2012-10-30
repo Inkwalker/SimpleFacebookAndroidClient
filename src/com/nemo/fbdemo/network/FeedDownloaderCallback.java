@@ -1,4 +1,4 @@
-package com.nemo.fbdemo;
+package com.nemo.fbdemo.network;
 
 import java.util.ArrayList;
 

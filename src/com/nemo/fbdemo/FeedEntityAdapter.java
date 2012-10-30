@@ -1,13 +1,16 @@
 package com.nemo.fbdemo;
 
 import java.util.ArrayList;
-
 import com.nemo.fbdemo.model.FeedEntity;
 import com.nemo.fbdemo.model.StatusEntry;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class FeedEntityAdapter extends BaseAdapter {
@@ -32,8 +35,7 @@ public class FeedEntityAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+		return arg0;
 	}
 
 	@Override
@@ -41,18 +43,38 @@ public class FeedEntityAdapter extends BaseAdapter {
 		View view;
 		
 		if(arg1 == null){
-			view = new TextView(arg2.getContext());
+			LayoutInflater inflater = (LayoutInflater)arg2.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			
+			view = inflater.inflate(R.layout.feed_entry, null);
 		}
 		else{
 			view = arg1;
 		}
 		
-		if(data.get(arg0) instanceof StatusEntry){
-			((TextView)view).setText(((StatusEntry)data.get(arg0)).getMessage());
+		TextView userNameView = (TextView)view.findViewById(R.id.feed_userName);
+		TextView feedMessageView = (TextView)view.findViewById(R.id.feed_message);
+		ImageView userPicView = (ImageView)view.findViewById(R.id.feed_userPic);
+		
+		if(data.get(arg0) != null){
+			String userName = data.get(arg0).getUser().getName();
+			Bitmap pic = data.get(arg0).getUser().getPicture();
+			
+			userNameView.setText(userName);
+			if(pic != null) userPicView.setImageBitmap(pic);
+			
+			if(data.get(arg0) instanceof StatusEntry){
+				String feedMessage = ((StatusEntry)data.get(arg0)).getMessage();
+				feedMessageView.setText(feedMessage);
+			}
+			else{
+				feedMessageView.setText("unknown type");
+			}
 		}
-		else{
-			((TextView)view).setText("unknown type");
+		else {
+			feedMessageView.setText("unknown type");
+			userNameView.setText("---");
 		}
+		
 		
 		return view;
 	}

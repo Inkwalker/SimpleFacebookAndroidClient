@@ -7,11 +7,19 @@ public abstract class FeedEntity {
 	String id;
 	User user;
 	
-	public FeedEntity(JSONObject data){
+	public FeedEntity(UsersList users, JSONObject data){
 		id = data.optString("id");
 		
 		JSONObject userData = data.optJSONObject("from");
-		user = UsersList.getInstance().getUser(userData.optString("id"));
+	
+		String userId = userData.optString("id");
+		String userName = userData.optString("name");
+	
+		user = users.getUser(userId, userName);
+	}
+	
+	public User getUser() {
+		return user;
 	}
 
 }
