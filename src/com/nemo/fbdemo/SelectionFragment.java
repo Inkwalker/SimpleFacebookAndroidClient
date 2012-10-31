@@ -8,15 +8,20 @@ import com.facebook.Request;
 import com.facebook.Session;
 import com.facebook.Response;
 import com.nemo.fbdemo.model.FeedEntry;
+import com.nemo.fbdemo.model.FeedEntryType;
 import com.nemo.fbdemo.model.FeedList;
 import com.nemo.fbdemo.model.UsersList;
 import com.nemo.fbdemo.network.FeedDownloader;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -42,6 +47,20 @@ public class SelectionFragment extends Fragment {
 	    userNameView = (TextView) view.findViewById(R.id.selection_user_name);
 	    
 	    feedListView = (ListView) view.findViewById(R.id.feed);
+	    feedListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position,	long id) {
+				FeedEntry entry = feedList.getFeed().get((int)id);
+				if(entry.getType() == FeedEntryType.Link ||
+				   entry.getType() == FeedEntryType.Photo ||
+				   entry.getType() == FeedEntryType.Video){
+					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(entry.getLink()));
+					startActivity(browserIntent);
+				}
+			}
+	    	
+		});
 	    
 		users = new UsersList();
 		users.setCallback(new UsersList.Callback() {

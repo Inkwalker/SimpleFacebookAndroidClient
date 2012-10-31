@@ -41,36 +41,50 @@ public class FeedEntryAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View oldView, ViewGroup parent) {
+		ViewHolder viewHolder;
 		View view;
 		if(oldView == null){
 			LayoutInflater inflater = (LayoutInflater)parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = inflater.inflate(R.layout.feed_entry, null);
+			
+			viewHolder = new ViewHolder();
+			
+			viewHolder.userName    = (TextView)view.findViewById(R.id.feed_userName);
+			viewHolder.feedMessage = (TextView)view.findViewById(R.id.feed_message);
+			viewHolder.userPhoto   = (ImageView)view.findViewById(R.id.feed_userPic);
+			viewHolder.feedPhoto   = (ImageView)view.findViewById(R.id.feed_pic);
+			
+			view.setTag(viewHolder);
 		}
 		else{
 			view = oldView;
-			cleanView(view);
+			viewHolder = (ViewHolder)view.getTag();
+			cleanView(viewHolder);
 		}
 		
-		TextView userNameView    = (TextView)view.findViewById(R.id.feed_userName);
-		TextView feedMessageView = (TextView)view.findViewById(R.id.feed_message);
-		ImageView userPicView    = (ImageView)view.findViewById(R.id.feed_userPic);
-		ImageView feedPicView    = (ImageView)view.findViewById(R.id.feed_pic);
+		FeedEntry entry = data.get(position);
 		
-		String userName = data.get(position).getUser().getName();
-		Bitmap pic      = data.get(position).getUser().getPicture();
+		String userName = entry.getUser().getName();
+		Bitmap pic      = entry.getUser().getPicture();
 		
-		userNameView.setText(userName);
-		if(pic != null) userPicView.setImageBitmap(pic);
+		viewHolder.userName.setText(userName);
+		if(pic != null) viewHolder.userPhoto.setImageBitmap(pic);
 		
 		String feedMessage;
-		switch (data.get(position).getType()) {
+		switch (entry.getType()) {
 		case Status:
-			feedMessage = data.get(position).getMessage();
-			feedPicView.setImageBitmap(null);
+			feedMessage = entry.getMessage();
 			break;
 		case Photo:
-			feedMessage = data.get(position).getDescription();
-			if(data.get(position).getPicture() != null) feedPicView.setImageBitmap(data.get(position).getPicture());
+			feedMessage = entry.getDescription();
+			if(entry.getPicture() != null) viewHolder.feedPhoto.setImageBitmap(entry.getPicture());
+			break;
+		case Video:
+			feedMessage = entry.getDescription();
+			if(entry.getPicture() != null) viewHolder.feedPhoto.setImageBitmap(entry.getPicture());
+			break;
+		case Link:
+			feedMessage = entry.getLink();
 			break;
 
 		default:
@@ -78,18 +92,21 @@ public class FeedEntryAdapter extends BaseAdapter {
 			break;
 		}
 		
-		feedMessageView.setText(feedMessage);
+		viewHolder.feedMessage.setText(feedMessage);
 		
 		return view;
 	}
 	
-	private void cleanView(View view){
-
-		TextView feedMessageView = (TextView)view.findViewById(R.id.feed_message);
-		ImageView feedPicView    = (ImageView)view.findViewById(R.id.feed_pic);
-		
-		feedMessageView.setText("");
-		feedPicView.setImageBitmap(null);
+	private void cleanView(ViewHolder viewHolder){	
+		viewHolder.feedMessage.setText("");
+		viewHolder.feedPhoto.setImageBitmap(null);
+	}
+	
+	private static class ViewHolder{
+		public TextView userName;
+		public TextView feedMessage;
+		public ImageView userPhoto;
+		public ImageView feedPhoto;
 	}
 
 }

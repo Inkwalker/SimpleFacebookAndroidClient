@@ -27,6 +27,8 @@ public class FeedList {
 	public void add(final FeedEntry entry){
 		String pictureUrl = entry.getPictureUrl();
 		
+		if(entry.getType() == FeedEntryType.Status && entry.getMessage().equals("")) return; //bugfix (empty status messages)
+		
 		if(!pictureUrl.equals("")){
 			PictureDownloader.download(pictureUrl, new PictureDownloader.Callback() {
 				
