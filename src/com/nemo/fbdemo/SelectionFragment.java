@@ -7,10 +7,10 @@ import com.facebook.ProfilePictureView;
 import com.facebook.Request;
 import com.facebook.Session;
 import com.facebook.Response;
-import com.nemo.fbdemo.model.FeedEntity;
+import com.nemo.fbdemo.model.FeedEntry;
+import com.nemo.fbdemo.model.FeedList;
 import com.nemo.fbdemo.model.UsersList;
 import com.nemo.fbdemo.network.FeedDownloader;
-import com.nemo.fbdemo.network.FeedDownloaderCallback;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,8 +25,9 @@ public class SelectionFragment extends Fragment {
 	private ProfilePictureView profilePictureView;
 	private TextView userNameView;
 	private ListView feedListView;
-	private FeedEntityAdapter feedAdapter;
+	private FeedEntryAdapter feedAdapter;
 	private UsersList users;
+	private FeedList feedList;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -58,6 +59,21 @@ public class SelectionFragment extends Fragment {
 			}
 			
 		});
+		
+		feedList = new FeedList();
+		feedList.setCallback(new FeedList.Callback() {
+			
+			@Override
+			public void dataChanged() {
+				if(feedAdapter != null){
+					getActivity().runOnUiThread(new Runnable() {
+						public void run() {
+							feedAdapter.notifyDataSetChanged();
+						}
+					});
+				}
+			}
+		});
 
 	    final Session session = Session.getActiveSession();
 	    if (session != null && session.isOpened()) {
@@ -75,12 +91,12 @@ public class SelectionFragment extends Fragment {
 	            
 	        });
 	        
-	        FeedDownloader downloader = new FeedDownloader(users);
-	        downloader.Download(new FeedDownloaderCallback() {
+	        FeedDownloader.Download(users, new FeedDownloader.Callback() {
 				
 				@Override
-				public void Downloaded(ArrayList<FeedEntity> entities) {
-					feedAdapter = new FeedEntityAdapter(entities);
+				public void Downloaded(ArrayList<FeedEntry> entries) {
+					feedList.add(entries);
+					feedAdapter = new FeedEntryAdapter(feedList);
 					feedListView.setAdapter(feedAdapter);					
 				}
 			});

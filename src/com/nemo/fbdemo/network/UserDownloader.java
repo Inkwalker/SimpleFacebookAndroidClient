@@ -1,39 +1,26 @@
 package com.nemo.fbdemo.network;
 
-import java.io.InputStream;
-import java.net.URL;
-
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import com.nemo.fbdemo.model.User;
 
 public class UserDownloader {
 	
+	public interface Callback{
+		public void Downloaded(User user);
+	}
+	
 	//TODO load bath
-	public void Download(final User user, final UserDownloaderCallback callback){
+	public static void Download(final User user, final Callback callback){
 		
-		new Thread(new Runnable() {
-			
+		String imageURL = "http://graph.facebook.com/"+user.getId()+"/picture?type=small";
+		
+		PictureDownloader.download(imageURL, new PictureDownloader.Callback() {			
 			@Override
-			public void run() {
-				user.setPicture(getUserPic(user.getId()));
+			public void downloaded(Bitmap picture) {
+				user.setPicture(picture);
 				callback.Downloaded(user);
 			}
-		}).start();
+		});
 
-	}
-	
-	public Bitmap getUserPic(String userID) {
-	    String imageURL;
-	    Bitmap bitmap = null;
-	    imageURL = "http://graph.facebook.com/"+userID+"/picture?type=small";
-	    try {
-	        bitmap = BitmapFactory.decodeStream((InputStream)new URL(imageURL).getContent());
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return bitmap;
-	}
-	
+	}	
 }

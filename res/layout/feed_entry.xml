@@ -24,6 +24,11 @@
             android:layout_marginLeft="10dp"/>
     </LinearLayout>
     
+    <ImageView 
+        android:id="@+id/feed_pic"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>"
+    
     <TextView 
         android:id="@+id/feed_message"
         android:layout_width="wrap_content"

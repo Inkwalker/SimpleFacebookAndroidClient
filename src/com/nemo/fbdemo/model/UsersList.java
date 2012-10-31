@@ -3,7 +3,6 @@ package com.nemo.fbdemo.model;
 import java.util.Vector;
 
 import com.nemo.fbdemo.network.UserDownloader;
-import com.nemo.fbdemo.network.UserDownloaderCallback;
 
 public class UsersList {
 		
@@ -12,12 +11,10 @@ public class UsersList {
 	}
 	
 	private Vector<User> users;
-	private UserDownloader downloader;
 	private Callback callback;
 	
 	public UsersList() {
 		users = new Vector<User>();
-		downloader = new UserDownloader();
 	}
 	
 	public void setCallback(Callback callback) {
@@ -40,8 +37,7 @@ public class UsersList {
 			result.setName(name);
 			
 			users.add(result);			
-			downloader.Download(result, new UserDownloaderCallback() {
-				
+			UserDownloader.Download(result, new UserDownloader.Callback() {
 				@Override
 				public void Downloaded(User user) {
 					if(callback != null) callback.userDataLoaded();
