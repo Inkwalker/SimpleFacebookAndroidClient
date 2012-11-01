@@ -30,6 +30,13 @@
             android:layout_gravity="center"
             android:textColor="#333"
             android:textSize="18sp" />
+    
+    <Button
+        android:id="@+id/write_post_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="write"/>
+    
 	</LinearLayout>
 	
 	<ListView 
