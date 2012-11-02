@@ -39,7 +39,8 @@ public class SelectionFragment extends Fragment {
 	private ListView feedListView;
 	private FeedEntryAdapter feedAdapter;
 	private UsersList users;
-	private FeedList feedList;
+	private static FeedList feedList;
+	private static String userName = "";
 	private Facebook mFacebook;
 	
 	@Override
@@ -124,11 +125,55 @@ public class SelectionFragment extends Fragment {
 			
 		});
 		
-		feedList = new FeedList();
+		loadFeed();
+
+		if(userName.equals("")){
+		    final Session session = Session.getActiveSession();
+		    if (session != null && session.isOpened()) {
+		        Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+		        	
+		            @Override
+		            public void onCompleted(GraphUser user, Response response) {
+		                if (session == Session.getActiveSession()) {
+		                    if (user != null) {
+		                        profilePictureView.setUserId(user.getId());
+		                        userName = user.getName();
+		                    }   
+		                }   
+		            }
+		            
+		        });
+		        
+		        Request.executeBatchAsync(request);
+		    }  
+		}
+		userNameView.setText(userName);
+	    
+	    return view;
+	}
+	
+	private void loadFeed(){
+		
+		if(feedList == null){
+			feedList = new FeedList();
+			
+		    FeedDownloader.Download(users, new FeedDownloader.Callback() {
+					@Override
+					public void Downloaded(ArrayList<FeedEntry> entries) {
+						feedList.add(entries);
+						feedAdapter = new FeedEntryAdapter(feedList);
+						feedListView.setAdapter(feedAdapter);					
+					}
+		    });
+		} else {
+			feedAdapter = new FeedEntryAdapter(feedList);
+			feedListView.setAdapter(feedAdapter);					
+		}
+		
 		feedList.setCallback(new FeedList.Callback() {
 			
-			@Override
-			public void dataChanged() {
+		@Override
+		public void dataChanged() {
 				if(feedAdapter != null){
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
@@ -138,37 +183,6 @@ public class SelectionFragment extends Fragment {
 				}
 			}
 		});
-
-	    final Session session = Session.getActiveSession();
-	    if (session != null && session.isOpened()) {
-	        Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
-	        	
-	            @Override
-	            public void onCompleted(GraphUser user, Response response) {
-	                if (session == Session.getActiveSession()) {
-	                    if (user != null) {
-	                        profilePictureView.setUserId(user.getId());
-	                        userNameView.setText(user.getName());
-	                    }   
-	                }   
-	            }
-	            
-	        });
-	        
-	        FeedDownloader.Download(users, new FeedDownloader.Callback() {
-				
-				@Override
-				public void Downloaded(ArrayList<FeedEntry> entries) {
-					feedList.add(entries);
-					feedAdapter = new FeedEntryAdapter(feedList);
-					feedListView.setAdapter(feedAdapter);					
-				}
-			});
-	        
-	        Request.executeBatchAsync(request);
-	    }  
-	    
-	    return view;
 	}
 	
 	
