@@ -14,7 +14,7 @@ public class UserDownloader {
 		
 		String imageURL = "http://graph.facebook.com/"+user.getId()+"/picture?type=small";
 		
-		PictureDownloader.download(imageURL, new PictureDownloader.Callback() {			
+		PictureDownloader.getInstance().download(imageURL, new PictureDownloader.Callback() {			
 			@Override
 			public void downloaded(Bitmap picture) {
 				user.setPicture(picture);

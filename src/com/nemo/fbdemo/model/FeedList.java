@@ -30,7 +30,7 @@ public class FeedList {
 		if(entry.getType() == FeedEntryType.Status && entry.getMessage().equals("")) return; //bugfix (empty status messages)
 		
 		if(!pictureUrl.equals("")){
-			PictureDownloader.download(pictureUrl, new PictureDownloader.Callback() {
+			PictureDownloader.getInstance().download(pictureUrl, new PictureDownloader.Callback() {
 				
 				@Override
 				public void downloaded(Bitmap picture) {
