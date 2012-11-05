@@ -12,7 +12,7 @@ public class UserDownloader {
 	//TODO load bath
 	public static void Download(final User user, final Callback callback){
 		
-		String imageURL = "http://graph.facebook.com/"+user.getId()+"/picture?type=small";
+		String imageURL = "http://graph.facebook.com/"+user.getId()+"/picture?type=normal";
 		
 		PictureDownloader.getInstance().download(imageURL, new PictureDownloader.Callback() {			
 			@Override

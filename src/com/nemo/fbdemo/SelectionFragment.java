@@ -138,6 +138,7 @@ public class SelectionFragment extends Fragment {
 		                    if (user != null) {
 		                        profilePictureView.setUserId(user.getId());
 		                        userName = user.getName();
+		                        userNameView.setText(userName);
 		                    }   
 		                }   
 		            }
@@ -146,8 +147,7 @@ public class SelectionFragment extends Fragment {
 		        
 		        Request.executeBatchAsync(request);
 		    }  
-		}
-		userNameView.setText(userName);
+		} else userNameView.setText(userName);
 	    
 	    return view;
 	}

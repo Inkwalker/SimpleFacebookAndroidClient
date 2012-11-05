@@ -100,7 +100,14 @@ public class PictureDownloader {
 		
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			downloading.remove(url);
+			int index = -1;
+			for (int i = 0; i < downloading.size(); i++) {
+				if(downloading.get(i).url.equals(url)){
+					index = i;
+					break;
+				}				
+			}
+			if(index >= 0) downloading.remove(index);
 			bitmaps.put(url, result);
 			for (PictureDownloader.Callback callback : callbacks) {
 				callback.downloaded(result);

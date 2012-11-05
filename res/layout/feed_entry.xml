@@ -3,36 +3,45 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:padding="20dp"
-              android:orientation="vertical">
+              android:minHeight="70dip"
+              android:orientation="horizontal">
               
     <LinearLayout 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        
-        <ImageView 
-            android:id="@+id/feed_userPic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
         
         <TextView 
             android:id="@+id/feed_userName"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="center_vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:layout_marginLeft="10dp"/>
+        
+        <com.nemo.fbdemo.ResizableImageView
+        	android:id="@+id/feed_pic"
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"/>
+        	
+       	<TextView 
+        	android:id="@+id/feed_message"
+        	android:layout_width="fill_parent"
+        	android:layout_marginTop="10dp"
+        	android:gravity="center_vertical"
+        	android:layout_height="fill_parent"/>
     </LinearLayout>
     
     <ImageView 
-        android:id="@+id/feed_pic"
+        android:id="@+id/feed_userPic"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>"
-    
-    <TextView 
-        android:id="@+id/feed_message"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_height="wrap_content"/>
+        android:layout_height="fill_parent"
+        android:layout_weight="3"
+        android:layout_gravity="center_vertical"
+        android:scaleType="centerCrop"/>
     
 </LinearLayout>

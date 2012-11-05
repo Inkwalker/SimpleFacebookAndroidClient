@@ -76,7 +76,7 @@ public class FeedEntryAdapter extends BaseAdapter {
 			feedMessage = entry.getMessage();
 			break;
 		case Photo:
-			feedMessage = entry.getDescription();
+			feedMessage = entry.getMessage();
 			if(entry.getPicture() != null) viewHolder.feedPhoto.setImageBitmap(entry.getPicture());
 			break;
 		case Video:
