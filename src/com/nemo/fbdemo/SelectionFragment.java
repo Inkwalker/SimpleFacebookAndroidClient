@@ -7,10 +7,6 @@ import com.facebook.ProfilePictureView;
 import com.facebook.Request;
 import com.facebook.Session;
 import com.facebook.Response;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
 import com.nemo.fbdemo.model.FeedEntry;
 import com.nemo.fbdemo.model.FeedEntryType;
 import com.nemo.fbdemo.model.FeedList;
@@ -41,7 +37,6 @@ public class SelectionFragment extends Fragment {
 	private UsersList users;
 	private static FeedList feedList;
 	private static String userName = "";
-	private Facebook mFacebook;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -53,41 +48,13 @@ public class SelectionFragment extends Fragment {
 	    profilePictureView.setCropped(true);
 	    userNameView = (TextView) view.findViewById(R.id.selection_user_name);
 	    
-	    mFacebook = new Facebook(getString(R.string.app_id));
-	    
 	    //adding callback to write post button
 	    Button writeButton = (Button)view.findViewById(R.id.write_post_button);
 	    writeButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				mFacebook.dialog(getActivity(), "feed", new DialogListener() {
-					
-					@Override
-					public void onFacebookError(FacebookError e) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onError(DialogError e) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onComplete(Bundle values) {
-						Toast.makeText(getActivity(), getString(R.string.status_sent), Toast.LENGTH_SHORT).show();
-						
-					}
-					
-					@Override
-					public void onCancel() {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				
+				new StatusUpdateDialog().show(getFragmentManager(), "dialog"); 
 			}
 		});
 	    

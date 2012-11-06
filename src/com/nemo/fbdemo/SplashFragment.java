@@ -19,6 +19,7 @@ public class SplashFragment extends Fragment {
 	    
 	    LoginButton authButton = (LoginButton) view.findViewById(R.id.login_button);
 	    authButton.setReadPermissions(Arrays.asList("read_stream"));
+
 	    
 	    return view;
 	}

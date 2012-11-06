@@ -10,5 +10,9 @@
     <string name="feed_download_error">Something went wrong. Please check your internet connection and restart app.</string>
     <string name="status_sent">Status updated</string>
     <string name="write_button_text">Write</string>
+    <string name="dialog_send">Send</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_edittext_hint">Write new status</string>
+    <string name="sent_message">Status updated</string>
 
 </resources>
