@@ -44,6 +44,7 @@ public class FeedEntryAdapter extends BaseAdapter {
 		ViewHolder viewHolder;
 		View view;
 		if(oldView == null){
+			//creating new view and viewHolder
 			LayoutInflater inflater = (LayoutInflater)parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = inflater.inflate(R.layout.feed_entry, null);
 			
@@ -57,6 +58,7 @@ public class FeedEntryAdapter extends BaseAdapter {
 			view.setTag(viewHolder);
 		}
 		else{
+			//reusing old view
 			view = oldView;
 			viewHolder = (ViewHolder)view.getTag();
 			cleanView(viewHolder);
@@ -71,6 +73,7 @@ public class FeedEntryAdapter extends BaseAdapter {
 		if(pic != null) viewHolder.userPhoto.setImageBitmap(pic);
 		
 		String feedMessage;
+		
 		switch (entry.getType()) {
 		case Status:
 			feedMessage = entry.getMessage();

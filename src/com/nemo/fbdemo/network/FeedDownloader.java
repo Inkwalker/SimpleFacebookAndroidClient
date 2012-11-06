@@ -16,6 +16,7 @@ public class FeedDownloader {
 	
 	public interface Callback{
 		public void Downloaded(ArrayList<FeedEntry> entities);
+		public void Error();
 	}
 	
 	public static void Download(final UsersList users, final Callback callback){
@@ -24,8 +25,10 @@ public class FeedDownloader {
 	        Request request = Request.newGraphPathRequest(session, "me/home/", new Request.Callback() {		
 				@Override
 				public void onCompleted(Response response) {
-					ArrayList<FeedEntry> feedEntries = createFeedEntries(users, response.getGraphObject().getInnerJSONObject());
-					callback.Downloaded(feedEntries);					
+					if(response.getError() == null){
+						ArrayList<FeedEntry> feedEntries = createFeedEntries(users, response.getGraphObject().getInnerJSONObject());
+						callback.Downloaded(feedEntries);
+					} else callback.Error();
 				}
 			});
 	        

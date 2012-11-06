@@ -44,19 +44,18 @@ public class SelectionFragment extends Fragment {
 	private Facebook mFacebook;
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, 
-	        ViewGroup container, Bundle savedInstanceState){
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 	    super.onCreateView(inflater, container, savedInstanceState);
 	    
 	    View view = inflater.inflate(R.layout.selection, container, false);
 
 	    profilePictureView = (ProfilePictureView) view.findViewById(R.id.selection_profile_pic);
 	    profilePictureView.setCropped(true);
-
 	    userNameView = (TextView) view.findViewById(R.id.selection_user_name);
 	    
 	    mFacebook = new Facebook(getString(R.string.app_id));
 	    
+	    //adding callback to write post button
 	    Button writeButton = (Button)view.findViewById(R.id.write_post_button);
 	    writeButton.setOnClickListener(new OnClickListener() {
 			
@@ -78,7 +77,7 @@ public class SelectionFragment extends Fragment {
 					
 					@Override
 					public void onComplete(Bundle values) {
-						Toast.makeText(getActivity(), "Status updated", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getActivity(), getString(R.string.status_sent), Toast.LENGTH_SHORT).show();
 						
 					}
 					
@@ -92,6 +91,7 @@ public class SelectionFragment extends Fragment {
 			}
 		});
 	    
+	    //adding callback to feed listView
 	    feedListView = (ListView) view.findViewById(R.id.feed);
 	    feedListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -108,12 +108,13 @@ public class SelectionFragment extends Fragment {
 	    	
 		});
 	    
+	    //adding callback to userList. It will be called when user pictures loaded.
 		users = new UsersList();
 		users.setCallback(new UsersList.Callback() {
 			
 			@Override
 			public void userDataLoaded() {
-				if(feedAdapter != null){
+				if(feedAdapter != null && getActivity() != null){
 					
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
@@ -125,8 +126,18 @@ public class SelectionFragment extends Fragment {
 			
 		});
 		
+		loadUser();
+	    
+	    return view;
+	}
+	
+	@Override 
+	public void onResume(){
+		super.onResume();
 		loadFeed();
-
+	}
+	
+	private void loadUser(){
 		if(userName.equals("")){
 		    final Session session = Session.getActiveSession();
 		    if (session != null && session.isOpened()) {
@@ -148,11 +159,9 @@ public class SelectionFragment extends Fragment {
 		        Request.executeBatchAsync(request);
 		    }  
 		} else userNameView.setText(userName);
-	    
-	    return view;
 	}
 	
-	private void loadFeed(){
+ 	private void loadFeed(){
 		
 		if(feedList == null){
 			feedList = new FeedList();
@@ -164,17 +173,24 @@ public class SelectionFragment extends Fragment {
 						feedAdapter = new FeedEntryAdapter(feedList);
 						feedListView.setAdapter(feedAdapter);					
 					}
+
+					@Override
+					public void Error() {
+						Toast.makeText(getActivity(), getString(R.string.feed_download_error), Toast.LENGTH_SHORT).show();
+						feedList = null;
+					}
 		    });
 		} else {
 			feedAdapter = new FeedEntryAdapter(feedList);
 			feedListView.setAdapter(feedAdapter);					
 		}
 		
+		//adding feedList callback. will be called when pictures loaded.
 		feedList.setCallback(new FeedList.Callback() {
 			
 		@Override
 		public void dataChanged() {
-				if(feedAdapter != null){
+				if(feedAdapter != null && getActivity() != null){
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							feedAdapter.notifyDataSetChanged();
