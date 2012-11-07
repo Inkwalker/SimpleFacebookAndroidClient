@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,10 +34,12 @@ public class SelectionFragment extends Fragment {
 	private ProfilePictureView profilePictureView;
 	private TextView userNameView;
 	private ListView feedListView;
+	private ProgressBar feedProgressBar;
+	
 	private FeedEntryAdapter feedAdapter;
 	private UsersList users;
 	private static FeedList feedList;
-	private static String userName = "";
+	private static String userName = "Loading...";
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -47,6 +50,7 @@ public class SelectionFragment extends Fragment {
 	    profilePictureView = (ProfilePictureView) view.findViewById(R.id.selection_profile_pic);
 	    profilePictureView.setCropped(true);
 	    userNameView = (TextView) view.findViewById(R.id.selection_user_name);
+	    feedProgressBar = (ProgressBar)view.findViewById(R.id.feed_progressBar);
 	    
 	    //adding callback to write post button
 	    Button writeButton = (Button)view.findViewById(R.id.write_post_button);
@@ -105,7 +109,7 @@ public class SelectionFragment extends Fragment {
 	}
 	
 	private void loadUser(){
-		if(userName.equals("")){
+		if(userName.equals("Loading...")){
 		    final Session session = Session.getActiveSession();
 		    if (session != null && session.isOpened()) {
 		        Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
@@ -131,6 +135,7 @@ public class SelectionFragment extends Fragment {
  	private void loadFeed(){
 		
 		if(feedList == null){
+			feedProgressBar.setVisibility(ProgressBar.VISIBLE);
 			feedList = new FeedList();
 			
 		    FeedDownloader.Download(users, new FeedDownloader.Callback() {
@@ -138,7 +143,8 @@ public class SelectionFragment extends Fragment {
 					public void Downloaded(ArrayList<FeedEntry> entries) {
 						feedList.add(entries);
 						feedAdapter = new FeedEntryAdapter(feedList);
-						feedListView.setAdapter(feedAdapter);					
+						feedListView.setAdapter(feedAdapter);	
+						feedProgressBar.setVisibility(ProgressBar.INVISIBLE);
 					}
 
 					@Override

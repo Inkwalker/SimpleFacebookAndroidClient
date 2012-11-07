@@ -1,47 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:minHeight="70dip"
-              android:orientation="horizontal">
-              
-    <LinearLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="70dip"
+    android:orientation="horizontal" >
+
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="10dp"
         android:layout_weight="1"
-        android:orientation="vertical">
-        
-        <TextView 
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp" >
+
+        <TextView
             android:id="@+id/feed_userName"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_marginLeft="10dp"/>
-        
-        <com.nemo.fbdemo.ResizableImageView
-        	android:id="@+id/feed_pic"
-        	android:layout_width="match_parent"
-        	android:layout_height="wrap_content"/>
-        	
-       	<TextView 
-        	android:id="@+id/feed_message"
-        	android:layout_width="fill_parent"
-        	android:layout_marginTop="10dp"
-        	android:gravity="center_vertical"
-        	android:layout_height="fill_parent"/>
+            android:layout_marginLeft="10dp"
+            android:gravity="center_horizontal" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <com.nemo.fbdemo.ResizableImageView
+                android:id="@+id/feed_pic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:id="@+id/feed_pic_progressBar"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/feed_message"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical" />
     </LinearLayout>
-    
-    <ImageView 
-        android:id="@+id/feed_userPic"
+
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="3"
-        android:layout_gravity="center_vertical"
-        android:scaleType="centerCrop"/>
-    
+        android:layout_weight="3" >
+
+        <ImageView
+            android:id="@+id/feed_userPic"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerCrop" />
+
+        <ProgressBar
+            android:id="@+id/feed_userPic_progressBar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:indeterminate="true"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
 </LinearLayout>

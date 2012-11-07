@@ -14,5 +14,9 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_edittext_hint">Write new status</string>
     <string name="sent_message">Status updated</string>
+    
+	<string name="pull_to_refresh_pull_label">Pull to refresh...</string>
+	<string name="pull_to_refresh_release_label">Release to refresh...</string>
+	<string name="pull_to_refresh_refreshing_label">Loading...</string>
 
 </resources>
