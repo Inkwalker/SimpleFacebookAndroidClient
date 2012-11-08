@@ -49,11 +49,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <ListView
+        <com.nemo.fbdemo.PullToRefresh
             android:id="@+id/feed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </ListView>
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
 
         <ProgressBar
             android:id="@+id/feed_progressBar"

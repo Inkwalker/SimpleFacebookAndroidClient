@@ -108,6 +108,7 @@ public class FeedEntryAdapter extends BaseAdapter {
 		
 		return view;
 	}
+
 	
 	private void cleanView(ViewHolder viewHolder){	
 		viewHolder.feedMessage.setText("");

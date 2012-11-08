@@ -12,6 +12,9 @@ public class FeedList {
 		public void dataChanged();
 	}
 	
+	String nextPageUrl;
+	String prevPageUrl;
+	
 	Callback callback;
 	
 	ArrayList<FeedEntry> feed;
@@ -24,18 +27,18 @@ public class FeedList {
 		this.callback = callback;
 	}
 	
-	public void add(final FeedEntry entry){
+	public void add(final FeedEntry entry, boolean downloadPictures){
 		String pictureUrl = entry.getPictureUrl();
 		
 		if(entry.getType() == FeedEntryType.Status && entry.getMessage().equals("")) return; //bugfix (empty status messages)
 		
-		if(!pictureUrl.equals("")){
+		if(downloadPictures && !pictureUrl.equals("")){
 			PictureDownloader.getInstance().download(pictureUrl, new PictureDownloader.Callback() {
 				
 				@Override
 				public void downloaded(Bitmap picture) {
 					entry.setPicture(picture);
-					callback.dataChanged();
+					if(callback != null) callback.dataChanged();
 				}
 			});
 		}
@@ -43,14 +46,46 @@ public class FeedList {
 		feed.add(entry);
 	}
 	
-	public void add(ArrayList<FeedEntry> entries){
+	public void add(ArrayList<FeedEntry> entries, boolean downloadPictures){
 		for (int i = 0; i < entries.size(); i++) {
-			add(entries.get(i));
+			add(entries.get(i), downloadPictures);
 		}
+	}
+	
+	public void add(FeedList list, boolean toEnd){
+		if(toEnd){
+			add(list.getFeed(), true);
+			nextPageUrl = list.getNextPageUrl();
+		} else {
+			//TODO
+		}
+		
+		
 	}
 	
 	public ArrayList<FeedEntry> getFeed(){
 		return feed;
+	}
+	
+	public void clear(){
+		feed.clear();
+	}
+	
+	
+	public String getNextPageUrl(){
+		return nextPageUrl;
+	}
+	
+	public void setNextPageUrl(String url){
+		nextPageUrl = url;
+	}
+	
+	public String getPrevPageUrl(){
+		return prevPageUrl;
+	}
+	
+	public void setPrevPageUrl(String url){
+		prevPageUrl = url;
 	}
 
 }

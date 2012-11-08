@@ -1,7 +1,5 @@
 package com.nemo.fbdemo;
 
-import java.util.ArrayList;
-
 import com.facebook.GraphUser;
 import com.facebook.ProfilePictureView;
 import com.facebook.Request;
@@ -24,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +30,7 @@ public class SelectionFragment extends Fragment {
 	
 	private ProfilePictureView profilePictureView;
 	private TextView userNameView;
-	private ListView feedListView;
+	private PullToRefresh feedListView;
 	private ProgressBar feedProgressBar;
 	
 	private FeedEntryAdapter feedAdapter;
@@ -63,7 +60,7 @@ public class SelectionFragment extends Fragment {
 		});
 	    
 	    //adding callback to feed listView
-	    feedListView = (ListView) view.findViewById(R.id.feed);
+	    feedListView = (PullToRefresh) view.findViewById(R.id.feed);
 	    feedListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -77,6 +74,13 @@ public class SelectionFragment extends Fragment {
 				}
 			}
 	    	
+		});
+	    feedListView.setOnRefreshListener(new PullToRefresh.OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				loadOlderFeed();
+			}
 		});
 	    
 	    //adding callback to userList. It will be called when user pictures loaded.
@@ -129,47 +133,72 @@ public class SelectionFragment extends Fragment {
 		        
 		        Request.executeBatchAsync(request);
 		    }  
-		} else userNameView.setText(userName);
+		}
+		userNameView.setText(userName);
+	}
+	
+	private void loadOlderFeed(){
+		Bundle bundle = new Bundle();
+		bundle.putString("limit", "10");
+		bundle.putString("until", feedList.getNextPageUrl());
+		FeedDownloader.Download(users, false, bundle, new FeedDownloader.Callback() {
+			
+			@Override
+			public void Error() {
+				Toast.makeText(getActivity(), "Error", Toast.LENGTH_LONG).show();
+				feedListView.onRefreshComplete();
+			}
+			
+			@Override
+			public void Downloaded(FeedList feed) {
+				if(feed != null) feedList.add(feed, true);
+				else Toast.makeText(getActivity(), "No more feeds", Toast.LENGTH_SHORT).show();
+				feedListView.onRefreshComplete();
+			}
+		});
 	}
 	
  	private void loadFeed(){
 		
-		if(feedList == null){
-			feedProgressBar.setVisibility(ProgressBar.VISIBLE);
-			feedList = new FeedList();
-			
-		    FeedDownloader.Download(users, new FeedDownloader.Callback() {
-					@Override
-					public void Downloaded(ArrayList<FeedEntry> entries) {
-						feedList.add(entries);
-						feedAdapter = new FeedEntryAdapter(feedList);
-						feedListView.setAdapter(feedAdapter);	
-						feedProgressBar.setVisibility(ProgressBar.INVISIBLE);
-					}
-
-					@Override
-					public void Error() {
-						Toast.makeText(getActivity(), getString(R.string.feed_download_error), Toast.LENGTH_SHORT).show();
-						feedList = null;
-					}
-		    });
-		} else {
-			feedAdapter = new FeedEntryAdapter(feedList);
-			feedListView.setAdapter(feedAdapter);					
-		}
+ 		if(feedList != null && feedList.getFeed().size() > 0){
+ 			feedAdapter = new FeedEntryAdapter(feedList);
+			feedListView.setAdapter(feedAdapter);
+			return;
+ 		}
 		
-		//adding feedList callback. will be called when pictures loaded.
-		feedList.setCallback(new FeedList.Callback() {
+		feedProgressBar.setVisibility(ProgressBar.VISIBLE);
+		Bundle params = new Bundle();
+		params.putString("limit", "10");
+		
+		FeedDownloader.Download(users, true, params, new FeedDownloader.Callback() {
 			
-		@Override
-		public void dataChanged() {
-				if(feedAdapter != null && getActivity() != null){
-					getActivity().runOnUiThread(new Runnable() {
-						public void run() {
-							feedAdapter.notifyDataSetChanged();
+			@Override
+			public void Downloaded(FeedList feed) {
+				feedList = feed;
+				feedAdapter = new FeedEntryAdapter(feedList);
+				feedListView.setAdapter(feedAdapter);	
+				feedProgressBar.setVisibility(ProgressBar.INVISIBLE);
+				
+				//adding feedList callback. will be called when pictures loaded.
+				feedList.setCallback(new FeedList.Callback() {
+					
+				@Override
+				public void dataChanged() {
+						if(feedAdapter != null && getActivity() != null){
+							getActivity().runOnUiThread(new Runnable() {
+								public void run() {
+									feedAdapter.notifyDataSetChanged();
+								}
+							});
 						}
-					});
-				}
+					}
+				});
+			}
+
+			@Override
+			public void Error() {
+				Toast.makeText(getActivity(), getString(R.string.feed_download_error), Toast.LENGTH_LONG).show();
+				feedList = null;
 			}
 		});
 	}
