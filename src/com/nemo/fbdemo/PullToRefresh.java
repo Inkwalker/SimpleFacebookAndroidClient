@@ -28,9 +28,11 @@ public class PullToRefresh extends LinearLayout {
 	// Constants
 	// ===========================================================
 
-	private static final int PULL_TO_REFRESH = 0;
-	private static final int RELEASE_TO_REFRESH = PULL_TO_REFRESH + 1;
+	private static final int PULL_TO_ACTION = 0;
+	private static final int RELEASE_TO_REFRESH = PULL_TO_ACTION + 1;
 	private static final int REFRESHING = RELEASE_TO_REFRESH + 1;
+	private static final int RELEASE_TO_LOAD = REFRESHING + 1;
+	private static final int LOADING = RELEASE_TO_LOAD + 1;
 
 	private static final int EVENT_COUNT = 3;
 
@@ -38,25 +40,37 @@ public class PullToRefresh extends LinearLayout {
 	// Fields
 	// ===========================================================
 
-	private int state = PULL_TO_REFRESH;
+	private int state = PULL_TO_ACTION;
 
 	private ListView listView;
+	
 	private RelativeLayout header;
 	private TextView headerText;
 	private ImageView headerImage;
+	
+	private RelativeLayout footer;
+	private TextView footerText;
+	private ImageView footerImage;
+	
 	private Animation flipAnimation, reverseAnimation;
 
 	private int headerHeight;
-	private float startY = -1;
+	private float headerStartY = -1;
+	
+	private int footerHeight;
+	private float footerStartY = -1;
+	
 	private Handler handler = new Handler();
 	private PullToRefreshAdapter adapter;
 
 	private OnItemClickListener onItemClickListener;
 	private OnTouchListener onTouchListener;
 	private OnRefreshListener onRefreshListener;
+	private OnLoadListener onLoadListener;
 
 	private float[] lastYs = new float[EVENT_COUNT];
 	private boolean canPullDownToRefresh = true;
+	private boolean canPullUpToLoad = true;
 
 	private OnTouchListener listViewOnTouchListener = new OnTouchListener() {
 
@@ -72,6 +86,15 @@ public class PullToRefresh extends LinearLayout {
 		@Override
 		public void run() {
 			hideHeader();
+		}
+
+	};
+	
+	private Runnable hideFooterRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			hideFooter();
 		}
 
 	};
@@ -191,8 +214,23 @@ public class PullToRefresh extends LinearLayout {
 			adapter.setRefreshed(true);
 		}
 	}
+	
+	public void setLoaded() {
+		state = LOADING;
+		
+		int topMargin = getFooterScroll();
+		if (topMargin != 0) {
+			setFooterScroll(topMargin - footerHeight);
+		}
+		
+		footer.setVisibility(View.INVISIBLE);
+		
+		if (adapter != null) {
+			adapter.setRefreshed(true);
+		}
+	}
 
-	public ListAdapter getAdapter() {
+ 	public ListAdapter getAdapter() {
 		return listView.getAdapter();
 	}
 
@@ -231,16 +269,17 @@ public class PullToRefresh extends LinearLayout {
 
 	private void init(Context context, AttributeSet attrs) {
 		setOrientation(LinearLayout.VERTICAL);
-
+		
+		//header
 		header = (RelativeLayout) LayoutInflater.from(context).inflate(
 				R.layout.pull_to_refresh_header, this, false);
 
-		headerText = (TextView) header.findViewById(R.id.pull_to_refresh_text);
+		headerText = (TextView) header.findViewById(R.id.pull_to_refresh_header_text);
 		headerImage = (ImageView) header
-				.findViewById(R.id.pull_to_refresh_image);
+				.findViewById(R.id.pull_to_refresh_header_image);
 
 		LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.WRAP_CONTENT);
+				LayoutParams.WRAP_CONTENT, 0);
 
 		addView(header, lp);
 
@@ -248,7 +287,6 @@ public class PullToRefresh extends LinearLayout {
 		headerHeight = header.getMeasuredHeight();
 
 		// ListView
-
 		listView = new ListView(context, attrs) {
 
 			@Override
@@ -265,10 +303,27 @@ public class PullToRefresh extends LinearLayout {
 		listView.setOnTouchListener(listViewOnTouchListener);
 
 		lp = new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT);
+				LayoutParams.FILL_PARENT, 1);
 
 		addView(listView, lp);
-
+		
+		//Footer
+		footer = (RelativeLayout) LayoutInflater.from(context).inflate(
+				R.layout.pull_to_refresh_footer, this, false);
+		
+		footerText = (TextView) footer.findViewById(R.id.pull_to_refresh_footer_text);
+		footerImage = (ImageView) footer
+				.findViewById(R.id.pull_to_refresh_footer_image);
+		
+		lp = new LayoutParams(LayoutParams.FILL_PARENT,
+				LayoutParams.WRAP_CONTENT, 0);
+		
+		addView(footer, lp);
+		
+		measureView(footer);
+		footerHeight = footer.getMeasuredHeight();
+		
+		//animations
 		flipAnimation = new RotateAnimation(0, -180,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
@@ -283,7 +338,7 @@ public class PullToRefresh extends LinearLayout {
 		reverseAnimation.setFillAfter(true);
 
 		setPadding(getPaddingLeft(), -headerHeight, getPaddingRight(),
-				getPaddingBottom());
+				-footerHeight);
 	}
 
 	private void measureView(View child) {
@@ -312,21 +367,34 @@ public class PullToRefresh extends LinearLayout {
 			case MotionEvent.ACTION_MOVE :
 				updateEventStates(event);
 
-				if (isPullingDownToRefresh() && startY == -1) {
-					if (startY == -1) {
-						startY = event.getY();
+				if (isPullingDownToRefresh() && headerStartY == -1) {
+					if (headerStartY == -1) {
+						headerStartY = event.getY();
+					}
+					return false;
+				}
+				
+				if (isPullingUpToLoad() && footerStartY == -1) {
+					if (footerStartY == -1) {
+						footerStartY = event.getY();
 					}
 					return false;
 				}
 
-				if (startY != -1 && !listView.isPressed()) {
-					pullDown(event, startY);
+				if (headerStartY != -1 && !listView.isPressed()) {
+					pullDown(event, headerStartY);
+					return true;
+				}
+				
+				if (footerStartY != -1 && !listView.isPressed()){
+					pullUp(event, footerStartY);
 					return true;
 				}
 				break;
 			case MotionEvent.ACTION_UP :
 				initializeYsHistory();
-				startY = -1;
+				headerStartY = -1;
+				footerStartY = -1;
 
 				if (state == RELEASE_TO_REFRESH) {
 					setRefreshed();
@@ -334,8 +402,15 @@ public class PullToRefresh extends LinearLayout {
 						onRefreshListener.onRefresh();
 					}
 				}
+				
+				if(state == RELEASE_TO_LOAD){
+					if(onLoadListener != null) {
+						onLoadListener.onLoad();
+					}
+				}
 
 				ensureHeaderPosition();
+				ensureFooterPosition();
 				break;
 		}
 
@@ -346,9 +421,9 @@ public class PullToRefresh extends LinearLayout {
 	}
 
 	private void resetHeader() {
-		state = PULL_TO_REFRESH;
+		state = PULL_TO_ACTION;
 		initializeYsHistory();
-		startY = -1;
+		headerStartY = -1;
 		header.setVisibility(View.VISIBLE);
 		headerText.setText(R.string.pull_to_refresh_pull_label);
 		headerImage.clearAnimation();
@@ -367,26 +442,56 @@ public class PullToRefresh extends LinearLayout {
 
 		setHeaderScroll((int) (height));
 
-		if (state == PULL_TO_REFRESH && height - headerHeight > 0) {
+		if (state == PULL_TO_ACTION && height - headerHeight > 0) {
 			state = RELEASE_TO_REFRESH;
 			headerText.setText(R.string.pull_to_refresh_release_label);
 			headerImage.clearAnimation();
 			headerImage.startAnimation(flipAnimation);
 		}
 		if (state == RELEASE_TO_REFRESH && height - headerHeight <= 0) {
-			state = PULL_TO_REFRESH;
+			state = PULL_TO_ACTION;
 			headerText.setText(R.string.pull_to_refresh_pull_label);
 			headerImage.clearAnimation();
 			headerImage.startAnimation(reverseAnimation);
+		}
+	}
+	
+	private void pullUp(MotionEvent event, float firstY) {
+		float averageY = average(lastYs);
+		
+		int height = (int) (Math.max(firstY - averageY, 0));
+		
+		setFooterScroll(height);
+		
+		if (state == PULL_TO_ACTION && height - footerHeight > 0) {
+			state = RELEASE_TO_LOAD;
+			footerText.setText(R.string.pull_to_refresh_release_label);
+			footerImage.clearAnimation();
+			footerImage.startAnimation(flipAnimation);
+		}
+		if (state == RELEASE_TO_LOAD && height - footerHeight <= 0) {
+			state = PULL_TO_ACTION;
+			footerText.setText(R.string.pull_to_refresh_pull_label);
+			footerImage.clearAnimation();
+			footerImage.startAnimation(reverseAnimation);
 		}
 	}
 
 	private void setHeaderScroll(int y) {
 		scrollTo(0, -y);
 	}
+	
+	private void setFooterScroll(int y) {
+		scrollTo(0, y);
+	}
 
 	private int getHeaderScroll() {
 		return -getScrollY();
+	}
+	
+	private int getFooterScroll(){
+		
+		return getScrollY();
 	}
 
 	private float average(float[] ysArray) {
@@ -415,15 +520,32 @@ public class PullToRefresh extends LinearLayout {
 
 	private boolean isPullingDownToRefresh() {
 		return canPullDownToRefresh && state != REFRESHING && isIncremental()
-				&& isFirstVisible() && adapter != null
+				&& isFirstFullyVisible() && adapter != null
+				&& adapter.isAbleToPullToRefresh();
+	}
+	
+	private boolean isPullingUpToLoad() {		
+		return canPullUpToLoad && state != LOADING && isDecremental()
+				&& isLastFullyVisible() && adapter != null
 				&& adapter.isAbleToPullToRefresh();
 	}
 
-	private boolean isFirstVisible() {
+	private boolean isFirstFullyVisible() {
 		if (this.listView.getCount() == 0) {
 			return true;
 		} else if (listView.getFirstVisiblePosition() == 0) {
 			return listView.getChildAt(0).getTop() >= listView.getTop();
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean isLastFullyVisible() {
+		if(this.listView.getCount() == 0){
+			return true;
+		} else if (listView.getLastVisiblePosition() == listView.getCount()-1) {
+			View view = listView.getChildAt(listView.getChildCount()-1);
+			return view.getBottom() <= listView.getBottom();
 		} else {
 			return false;
 		}
@@ -438,9 +560,23 @@ public class PullToRefresh extends LinearLayout {
 				&& Math.abs(lastYs[from] - lastYs[to]) > 10
 				&& lastYs[from] < lastYs[to];
 	}
+	
+	private boolean isDecremental() {
+		return this.isDecremental(0, EVENT_COUNT - 1);
+	}
+	
+	private boolean isDecremental(int from, int to) {
+		return lastYs[from] != 0 && lastYs[to] != 0
+				&& Math.abs(lastYs[from] - lastYs[to]) > 10
+				&& lastYs[from] > lastYs[to];
+	}
 
 	private void ensureHeaderPosition() {
 		handler.post(hideHeaderRunnable);
+	}
+	
+	private void ensureFooterPosition() {
+		handler.post(hideFooterRunnable);
 	}
 
 	private void hideHeader() {
@@ -456,6 +592,20 @@ public class PullToRefresh extends LinearLayout {
 			handler.postDelayed(hideHeaderRunnable, 20);
 		}
 	}
+	
+	private void hideFooter() {
+		int padding = getFooterScroll();
+		if(padding != 0) {
+			int top = padding - (int) (padding / 2);
+			if (top < 2) {
+				top = 0;
+			}
+			
+			setFooterScroll(top);
+
+			handler.postDelayed(hideFooterRunnable, 20);
+		}
+	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes
@@ -465,6 +615,11 @@ public class PullToRefresh extends LinearLayout {
 
 		public void onRefresh();
 
+	}
+	
+	public interface OnLoadListener {
+		
+		public void onLoad();
 	}
 
 	private class PullToRefreshAdapter extends BaseAdapter {
@@ -575,12 +730,12 @@ public class PullToRefresh extends LinearLayout {
 				if (convertView == null) {
 					convertView = LayoutInflater.from(parent.getContext())
 							.inflate(R.layout.pull_to_refresh_header, null);
-					convertView.findViewById(R.id.pull_to_refresh_image)
+					convertView.findViewById(R.id.pull_to_refresh_header_image)
 							.setVisibility(View.GONE);
-					convertView.findViewById(R.id.pull_to_refresh_progress)
+					convertView.findViewById(R.id.pull_to_refresh_header_progress)
 							.setVisibility(View.VISIBLE);
 					TextView tv = (TextView) convertView
-							.findViewById(R.id.pull_to_refresh_text);
+							.findViewById(R.id.pull_to_refresh_header_text);
 					tv.setText(R.string.pull_to_refresh_refreshing_label);
 				}
 				return convertView;
